@@ -64,7 +64,7 @@ public class TreeProcessorTests
     const int SlightlyMoreThanOneSecond = 1100;
 
     [Test(Timeout = SlightlyMoreThanOneSecond)]
-    public async Task ProcessesOperationInParallel()
+    public async Task ProcessesOperationsInParallel()
     {
         var result = await Process(new
         {
@@ -86,6 +86,23 @@ public class TreeProcessorTests
         Assert.Equal(0, result);
     }
 
+    [Test]
+    public async Task ProcessesOperationsWithComplexDataTypes()
+    {
+        var result = await Process(
+        new
+        {
+            Type = "Arithmetic",
+            Data = new
+            {
+                FirstNumber = 3,
+                SecondNumber = 2,
+                Operation = "Subtract"
+            }
+        });
+        Assert.Equal(1, result);
+    }
+
     static Task<int> Process<Configuration>(Configuration configuration)
     {
         var processor = new ServiceCollection()
@@ -93,6 +110,7 @@ public class TreeProcessorTests
                 .With<SumOperation>()
                 .With<SquareOperation>()
                 .With<SleepOneSecondAndSumOperation>()
+                .With<ArithmeticOperation>()
             )
             .BuildServiceProvider()
             .GetRequiredService<TreeProcessor<int>>();

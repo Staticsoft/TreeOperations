@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Staticsoft.TreeOperations.Memory;
@@ -10,9 +9,11 @@ namespace Staticsoft.TreeOperations.Memory;
 public class ObjectTreeProcessor<Result>
 {
     readonly IEnumerable<Operation<Result>> Operations;
+    readonly ObjectSerializer Serializer;
 
-    public ObjectTreeProcessor(IEnumerable<Operation<Result>> operations)
-        => Operations = operations;
+    public ObjectTreeProcessor(IEnumerable<Operation<Result>> operations, ObjectSerializer serializer)
+        => (Operations, Serializer)
+        = (operations, serializer);
 
     public async Task<Result> Process(Dictionary<string, object> tree)
     {
@@ -33,12 +34,10 @@ public class ObjectTreeProcessor<Result>
         var operationName = GetNodeType(dictionary);
         var operationData = GetNodeData(dictionary);
         var operation = Operations.Single(operation => operation.Name == operationName);
-        var data = ToDataType(operationData, operation.DataType);
-        return await operation.Process(data);
+        var data = Serializer.ToType(operationData, operation.DataType);
+        var processed = await operation.Process(data);
+        return processed ?? throw OperationNullResult();
     }
-
-    static object ToDataType(object operationData, Type operationDataType)
-        => JsonSerializer.Deserialize(JsonSerializer.Serialize(operationData), operationDataType);
 
     Task<object[]> ProcessArray(object[] array)
         => Task.WhenAll(array.Select(ProcessNode));
@@ -57,11 +56,14 @@ public class ObjectTreeProcessor<Result>
         => dictionary.ContainsKey("type") && dictionary.ContainsKey("data");
 
     static string GetNodeType(Dictionary<string, object> node)
-        => node["type"] as string;
+        => node["type"] as string ?? throw InvalidTree();
 
     static object GetNodeData(Dictionary<string, object> node)
         => node["data"];
 
     static FormatException InvalidTree()
         => new($"Invalid tree structure: both 'type' and 'data' properties must be included in the root object");
+
+    static InvalidOperationException OperationNullResult()
+        => new("Operation cannot return null as result");
 }
