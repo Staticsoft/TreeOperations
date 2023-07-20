@@ -25,7 +25,7 @@ public class JsonTreeProcessor<Result> : TreeProcessor<Result>
         var tree = JsonDocument.Parse(serializedTree).RootElement;
         if (tree.ValueKind != JsonValueKind.Object) throw new FormatException();
 
-        return Deserialize(tree) as Dictionary<string, object>;
+        return (Deserialize(tree) as Dictionary<string, object>)!;
     }
 
     static object Deserialize(JsonElement node) => node.ValueKind switch
@@ -33,7 +33,7 @@ public class JsonTreeProcessor<Result> : TreeProcessor<Result>
         JsonValueKind.False => false,
         JsonValueKind.True => true,
         JsonValueKind.Number => ParseNumber(node),
-        JsonValueKind.String => node.GetString(),
+        JsonValueKind.String => node.GetString()!,
         JsonValueKind.Array => node.EnumerateArray().Select(Deserialize).ToArray(),
         JsonValueKind.Object => node.EnumerateObject().ToDictionary(property => property.Name, property => Deserialize(property.Value)),
         _ => throw new FormatException($"Unsupported {nameof(JsonValueKind)} '{node.ValueKind}'")

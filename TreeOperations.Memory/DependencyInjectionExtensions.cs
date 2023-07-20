@@ -21,7 +21,8 @@ public static class DependencyInjectionExtensions
         build(new TreeProcessorBuilder<Result>(services));
 
         return services
-            .AddSingleton<ObjectTreeProcessor<Result>>();
+            .AddSingleton<ObjectTreeProcessor<Result>>()
+            .AddSingleton<ObjectSerializer>();
     }
 
     public static IServiceCollection UseOperation<Result, Implementation>(this IServiceCollection services)
