@@ -15,7 +15,7 @@ public interface Operation<Result> : Operation
     Type DataType { get; }
 }
 
-public abstract class Operation<Result, Data> : Operation<Result>
+public abstract class Operation<Data, Result> : Operation<Result>
 {
     public Task<Result> Process(object properties)
     {

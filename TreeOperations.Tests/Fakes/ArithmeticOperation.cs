@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Staticsoft.TreeOperations.Tests;
 
-public class ArithmeticOperation : Operation<int, ArithmeticOperation.Properties>
+public class ArithmeticOperation : Operation<ArithmeticOperation.Properties, int>
 {
     protected override Task<int> Process(Properties data)
         => Task.FromResult(ProcessOperation(data));
