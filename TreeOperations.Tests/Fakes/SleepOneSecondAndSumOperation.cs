@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Staticsoft.TreeOperations.Tests;
 
-public class SleepOneSecondAndSumOperation : Operation<int, int[]>
+public class SleepOneSecondAndSumOperation : Operation<int[], int>
 {
     protected override async Task<int> Process(int[] numbers)
     {
